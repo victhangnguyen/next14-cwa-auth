@@ -8,7 +8,7 @@ import FormSuccess from "@/components/form-success";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { LoginSchema } from "@/schemas";
+import { RegisterSchema } from "@/schemas";
 import {
   Form,
   FormControl,
@@ -20,33 +20,34 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { login } from "@/actions/login";
+import { register } from "@/actions/register";
 
-type LoginFormProps = {};
+type RegisterFormProps = {};
 
-const LoginForm = ({}: LoginFormProps) => {
+const RegisterForm = ({}: RegisterFormProps) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: "",
       password: "",
+      name: "",
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof LoginSchema>) {
+  function onSubmit(values: z.infer<typeof RegisterSchema>) {
     setError("");
     setSuccess("");
 
     // ✅ This will be type-safe and validated.
     startTransition(async () => {
-      const data = await login(values);
+      const data = await register(values);
       console.log(
-        "[useClient] components/auth/login-form.tsx->data: ",
+        "[useClient] components/auth/Register-form.tsx->data: ",
         data,
         "\n"
       );
@@ -62,14 +63,31 @@ const LoginForm = ({}: LoginFormProps) => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
+      headerLabel="Create an account"
+      backButtonLabel="Already have an account?"
+      backButtonHref="/auth/login"
       showSocial
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isPending}
+                      placeholder="Enter your name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -104,7 +122,7 @@ const LoginForm = ({}: LoginFormProps) => {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button disabled={isPending} type="submit" className="w-full">
-            Submit
+            Create an account
           </Button>
         </form>
       </Form>
@@ -112,4 +130,4 @@ const LoginForm = ({}: LoginFormProps) => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
